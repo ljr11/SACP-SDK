@@ -120,7 +120,7 @@ export default class Dispatcher extends EventEmitter {
             header.receiverId = requestPacket.header.senderId;
 
             const packet = new Packet(header, payload);
-            // console.log('ack before send:', packet.toBuffer());
+            this.writeLog && this.writeLog(`Ack: ${packet.toBuffer().toString('hex')}`);
             return this.communication.send(packet.toBuffer(), false);
             // .then(resPacket => {
             //     const response = new Response().fromBuffer(resPacket.payload);
@@ -170,7 +170,7 @@ export default class Dispatcher extends EventEmitter {
         const payload = Buffer.from([commandSet, commandId]);
         return this.send(0x01, 0x01, PeerId.CONTROLLER, payload).then((res) => {
             if (res.response?.result === 0) {
-                const businessId = `${res.packet.header.commandSet * 256 + res.packet.header.commandId}`;
+                const businessId = `${commandSet * 256 + commandId}`;
                 if (this.listenerCount(businessId) > 1) {
                     this.removeListener(businessId, callback);
                 } else {
